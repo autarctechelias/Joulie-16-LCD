@@ -1,0 +1,14 @@
+[Unit]
+Description=copywpa
+After=boot.mount
+ConditionPathExists=/boot/wpa_supplicant.conf
+Before=wpa_supplicant@wlan0.service
+
+[Service]
+Type=oneshot 
+WorkingDirectory=/scripts
+ExecStart=bash copywpa.sh
+
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,16 @@
+[Unit]
+Description=LCDMeter
+Requires=ttyACM0.device
+After=systemd-modules-load.service
+
+[Service]
+User=root
+Group=root
+Type=simple 
+WorkingDirectory=/scripts
+ExecStart=python3 LCD_Meter.py &
+Restart=always
+RestartSec=10 
+
+[Install]
+WantedBy=multi-user.target
