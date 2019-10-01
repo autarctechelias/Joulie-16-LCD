@@ -28,7 +28,7 @@ buildroot config for a Battery info screen with web ui for the Raspberry Pi Zero
 * Run `make` to start building your image. This requires an active internet connection to download all the packages. This will take a couple of hours depending on your system.
 * Once finished, navigate your file browser to the **output/images** dir where you will find a **sdcard.img** file. This is your SD card image.
 * Write that image file to your SD card.
-* Mount the ~34MB large boot partition and copy the wpa_supplicant.conf from this repo into the boot dir.
+* Mount the ~34MB large boot partition and copy the wpa_supplicant.conf from this repo into the boot partition.
 * Edit the wpa_supplicant.conf by adding your WiFi Credentials
 * Unmount the SD Card and plug it into your Pi Zero W
 * Connect the I2C LCD to the Pi according to the instructions below. Most LCD's will run off of 3.3V with usable but not good contrast, so a level shifter is recommended.
