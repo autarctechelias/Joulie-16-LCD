@@ -2,7 +2,7 @@
 
 __author__ = "Elias Ibis"
 __copyright__ = "Copyright 2019, AutarcTech GmbH"
-__license__ = "GPL"
+__license__ = "MIT"
 __version__ = "1.0.1"
 __maintainer__ = "Elias Ibis"
 __email__ = "elias.ibis@autarctech.de"
