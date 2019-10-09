@@ -1,0 +1,184 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BMS Monitor Data</title>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#00aba9">
+<meta name="theme-color" content="#ffffff">
+    <script src="Chart.bundle.js"></script>
+<style>
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #222;
+  border-radius: 6px;
+  box-shadow: 6px 6px 3px #00000094;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover {
+  background-color: #83c985;
+}
+
+.active {
+  background-color: #4CAF50;
+}
+
+body {
+  background-color: #355555;
+  cursor: auto;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.flex-container {
+  display: flex;
+  justify-content: center;
+}
+
+.nocursor {
+  cursor: none;
+}
+
+.iframe {
+  background-color: #999;
+  width: 550px;
+  margin-top: 25px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  border: none;
+}
+
+.chart {
+  width: 1000px;
+  height: 500px;
+  margin-top: 25px;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+  border: none;
+}
+
+</style>
+
+</head>
+<body>
+
+<ul>
+  <li><a href="/">Main</a></li>
+  <li><a class="active" href="/data.html">Data</a></li>
+  <li style="float:right"><a href="/restart.html">Restart</a></li>
+</ul>
+
+<canvas class="chart" id="myChart" width="1000" height="500"></canvas>
+
+
+
+<script>
+
+
+
+var ctx = document.getElementById('myChart');
+var myChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'],
+        datasets: [{
+            label: 'Cell Voltages',
+            backgroundColor: [
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(255, 206, 86, 0.2)'
+            ],
+            borderColor: [
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(255, 206, 86, 1)'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: false,
+		legend:{labels:{fontColor:'rgb(255,255,255)'}},
+		scales:{yAxes:[{ticks:{beginAtZero:true, min:2800, max:3800, fontColor:'rgb(255,255,255)'}}], xAxes: [{ticks: {fontColor: 'white'}}]}
+    }
+});
+
+
+function updateGraph() {
+
+var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+		var myObj = JSON.parse(this.responseText);
+		myChart.data.datasets[0].data = [myObj.SW.RawData[1], myObj.SW.RawData[3], myObj.SW.RawData[5], myObj.SW.RawData[7], myObj.SW.RawData[9], myObj.SW.RawData[11], myObj.SW.RawData[13], myObj.SW.RawData[15], myObj.SW.RawData[17], myObj.SW.RawData[19], myObj.SW.RawData[21], myObj.SW.RawData[23], myObj.SW.RawData[25], myObj.SW.RawData[27], myObj.SW.RawData[29], myObj.SW.RawData[31]];
+		myChart.update();
+  	}
+	};
+xmlhttp.open("GET", "/data.json", true);
+xmlhttp.send();
+
+}
+
+var timers = [];
+	 timers.push(setInterval(function() {
+            updateGraph();
+        }, 1500));
+
+
+
+
+
+
+
+
+
+</script>
+</body>
+</html>
