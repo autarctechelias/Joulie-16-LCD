@@ -2,7 +2,7 @@
 
 __author__ = "Elias Ibis"
 __copyright__ = "Copyright 2019, AutarcTech GmbH"
-__license__ = "MIT"
+__license__ = "GPL"
 __version__ = "1.0.1"
 __maintainer__ = "Elias Ibis"
 __email__ = "elias.ibis@autarctech.de"
@@ -16,11 +16,13 @@ import sys
 from threading import Thread
 import netifaces as ni
 import queue
-from bottle import run, post, request, response, get, route, static_file, HTTPResponse
+from bottle import run, post, request, response, get, route, static_file, HTTPResponse, error
 from time import sleep
 import serial
 import random
 import sys
+
+
 
 
 #initialize queue for multithreading
@@ -49,7 +51,6 @@ except:
 	sys.exit(1)
 try:
 	mylcd.lcd_display_string("Battery Status:",1)
-	mylcd.lcd_display_string(ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr'].rjust(20),4)
 except:
 	pass
 
@@ -82,6 +83,7 @@ def update_lcd():
 			mylcd.lcd_display_string((str(round(Voltage/1000.0,2))+"V").rjust(6), 2, 14)
 			mylcd.lcd_display_string((str(round(Current/1000.0,1))+"A").ljust(7),3)
 			mylcd.lcd_display_string((str(round(Power,2))+"W").rjust(9),3 ,11)
+			mylcd.lcd_display_string(ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr'].rjust(18),4, 2)
 			mylcd.lcd_display_string("",4)
 			mylcd.lcd_write_char(219)
 			if Current > 2000:
@@ -109,7 +111,7 @@ def get_json():
 		"Voltage":{"Unit":"mV","Value":Voltage},
 		"Current":{"Unit":"mA","Value":Current},
 		"Power":{"Unit":"W","Value":Power}
-		},"SW":{"QueueSize":q.qsize()}}, sort_keys=True)
+		},"SW":{"QueueSize":q.qsize(), "RawData":data}}, sort_keys=True)
 		return json_out;
 	except:
 		pass
@@ -128,22 +130,25 @@ def process():
 
 @route('/<filename>')
 def server_static(filename):
+	print(filename)
+	if filename == "restart.html":
+		print("Restart Trig'd")
+		subprocess.Popen('sleep 1; systemctl restart server.service', shell=True)
 	response = static_file(filename, root="Server")
 	response.set_header('Content-Language', 'de')
 	response.add_header("Cache-Control", "no-cache")
 	return response;						#Send requested file from Server root directory
-@route('/restart')
-def restart():
-	response.set_header('Content-Language', 'de')
-	response.add_header("Cache-Control", "no-cache")
-	subprocess.run(["systemctl", "restart", "server.service"])
-	return HTTPResponse(status=200)			#Restart the service unit on command. Usefull for LCD Resetting
 @route('/')
 def index():
 	response = static_file("index.html", root="Server")
 	response.set_header('Content-Language', 'de')
 	response.add_header("Cache-Control", "no-cache")
 	return response;						#Send the index.html as default for accessing the server
+
+@error(404) 
+def error404(error):
+	response = static_file("404.html", root="Server")
+	return response;
 
 
 run(host='0.0.0.0', port=80, debug=True)										#Start the Server and listen on all interfaces and port 8080
