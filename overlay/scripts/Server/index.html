@@ -56,8 +56,10 @@ body {
 }
 
 .nocursor {
-  cursor: none;
+  cursor: normal;
 }
+
+
 
 </style>
 </head>
@@ -229,8 +231,11 @@ body {
 ></canvas>
 </div>
 <br>
-<p1 id="p1"></p1>
-
+<div>Queue Length:</div>
+<div id="queue"></div>
+<br>
+<div>Number of Boards detected:</div>
+<div id="NoB"</div>
 <script>
 
 
@@ -246,17 +251,18 @@ function updateGauge() {
 	xmlhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
 		var myObj = JSON.parse(this.responseText);
-		gaugeSOC.setAttribute('data-value', myObj.Data.SOC.Value)
-        gaugePower.setAttribute('data-value', myObj.Data.Power.Value)
-		gaugeVolt.setAttribute('data-value', myObj.Data.Voltage.Value / 1000)
-		gaugeCurr.setAttribute('data-value', myObj.Data.Current.Value / 1000)
-		var queueSize = myObj.SW.QueueSize
+		gaugeSOC.setAttribute('data-value', myObj.BMS0.SOC.Value)
+        gaugePower.setAttribute('data-value', myObj.BMS0.Power.Value)
+		gaugeVolt.setAttribute('data-value', myObj.BMS0.Voltage.Value)
+		gaugeCurr.setAttribute('data-value', myObj.BMS0.Current.Value)
+		queue.innerHTML = myObj.BMS0.SW.QueueSize
+		NoB.innerHTML = myObj.BMSCount
 		
 
-		if (myObj.Data.SOC.Value <= 15) {
+		if (myObj.BMS0.SOC.Value <= 15) {
 			gaugeSOC.setAttribute('data-highlights', '[{ "from": 0, "to": 15, "color": "rgba(255,0,0,0.8)" }, { "from": 15, "to": 25, "color": "rgba(255,255,0,.40)" }, { "from": 25, "to": 80, "color": "rgba(0,255,0,.40)" }, { "from": 80, "to": 100, "color": "rgba(0,0,225,.40)" }]')
 		}
-		else if (myObj.Data.SOC.Value > 15 && myObj.Data.SOC.Value < 25) {
+		else if (myObj.BMS0.SOC.Value > 15 && myObj.BMS0.SOC.Value < 25) {
 			gaugeSOC.setAttribute('data-highlights', '[{ "from": 0, "to": 15, "color": "rgba(255,0,0,0.40)" }, { "from": 15, "to": 25, "color": "rgba(255,255,0,0.8)" }, { "from": 25, "to": 80, "color": "rgba(0,255,0,.40)" }, { "from": 80, "to": 100, "color": "rgba(0,0,225,.40)" }]')
 		}
 
@@ -272,7 +278,7 @@ xmlhttp.send();
 var timers = [];
 	 timers.push(setInterval(function() {
             updateGauge();
-        }, 750));
+        }, 1250));
 
 
 
