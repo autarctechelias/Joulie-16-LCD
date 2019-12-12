@@ -88,10 +88,10 @@ body {
   <li><a class="active" href="/data.html">Data</a></li>
   <li style="float:right"><a href="/restart.html">Restart</a></li>
 </ul>
-
+<div style="width: 100%; height: 500px">
 <canvas class="chart" id="myChart" width="1000" height="500"></canvas>
-
-
+</div>
+<div id="Data"></div>
 
 <script>
 
@@ -144,9 +144,10 @@ var myChart = new Chart(ctx, {
         }]
     },
     options: {
-        responsive: false,
+        responsive: true,
+		maintainAspectRatio: false,
 		legend:{labels:{fontColor:'rgb(255,255,255)'}},
-		scales:{yAxes:[{ticks:{beginAtZero:true, min:2800, max:3800, fontColor:'rgb(255,255,255)'}}], xAxes: [{ticks: {fontColor: 'white'}}]}
+		scales:{yAxes:[{ticks:{beginAtZero:true, min:2.800, max:4.300, fontColor:'rgb(255,255,255)'}}], xAxes: [{ticks: {fontColor: 'white'}}]}
     }
 });
 
@@ -157,7 +158,8 @@ var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
 		var myObj = JSON.parse(this.responseText);
-		myChart.data.datasets[0].data = [myObj.SW.RawData[1], myObj.SW.RawData[3], myObj.SW.RawData[5], myObj.SW.RawData[7], myObj.SW.RawData[9], myObj.SW.RawData[11], myObj.SW.RawData[13], myObj.SW.RawData[15], myObj.SW.RawData[17], myObj.SW.RawData[19], myObj.SW.RawData[21], myObj.SW.RawData[23], myObj.SW.RawData[25], myObj.SW.RawData[27], myObj.SW.RawData[29], myObj.SW.RawData[31]];
+		Data.innerHTML = myObj.BMS0.SW.RawData
+		myChart.data.datasets[0].data = myObj.BMS0.SW.RawData.slice(3,19);
 		myChart.update();
   	}
 	};
