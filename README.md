@@ -28,8 +28,9 @@ reworked to utilise the UDP Multicast protocoll enabled via DIP Switch 8 since v
 * Quit the menuconfig by hitting *ESC* until you return to the Terminal
 * Run `make` to start building your image. This requires an active internet connection to download all the packages. This will take a couple of hours depending on your system.
 * Once finished, navigate your file browser to the **output/images** dir where you will find a **sdcard.img** file. This is your SD card image.
-* Write that image file to your SD card.
-* Unmount the SD Card and plug it into your Pi Zero W
+* Alternatively you can download a prebuilt Image here: (https://drive.google.com/file/d/1jDVkfmO4_kC0xCqfQeMeR_219UbtfRNR/view?usp=sharing)
+* Write that image file to your SD card either using dd on Linux systems or using https://etcher.download
+* Unmount the SD Card and plug it into your Pi
 * Connect the I2C LCD to the Pi according to the instructions below. Most LCD's will run off of 3.3V with usable but not good contrast, so a level shifter is recommended.
 
 LCD SCL → Shift 1 → Pi Pin 5
@@ -50,6 +51,7 @@ Shift LV → Pi Pin 1
 * The Pi should boot within ~2 minutes
 * You should now see the battery status on the LCD
 * Now you can open up a browser and go to (http://autarctech-bms/) to view the web interface.
+* If you are directly connected to the BMS then call up this address: http://10.214.161.1
 * Debugging via SSH:
   - Username: root
   - Password: AutarcTech
