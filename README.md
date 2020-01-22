@@ -12,6 +12,8 @@ reworked to utilise the UDP Multicast protocoll enabled via DIP Switch 8 since v
 
 × Class 10 Micro SD Card with at least 4GB
 
+×Jumper wires and/or a small circuit board
+
 
 ## Instructions for building:
 
@@ -32,6 +34,8 @@ reworked to utilise the UDP Multicast protocoll enabled via DIP Switch 8 since v
 * Write that image file to your SD card either using dd on Linux systems or using https://etcher.download
 * Unmount the SD Card and plug it into your Pi
 * Connect the I2C LCD to the Pi according to the instructions below. Most LCD's will run off of 3.3V with usable but not good contrast, so a level shifter is recommended.
+
+Connect the components as follows. You can either use jumper wires or solder the components to a piece of through-hole board.
 
 LCD SCL → Shift 1 → Pi Pin 5
 
