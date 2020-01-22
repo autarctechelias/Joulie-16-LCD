@@ -10,7 +10,7 @@ reworked to utilise the UDP Multicast protocoll enabled via DIP Switch 8 since v
 
 × 3.3V to 5V Level shifter
 
-× Class 10 Micro SD Card with at least 1GB
+× Class 10 Micro SD Card with at least 4GB
 
 
 ## Instructions for building:
@@ -28,7 +28,7 @@ reworked to utilise the UDP Multicast protocoll enabled via DIP Switch 8 since v
 * Quit the menuconfig by hitting *ESC* until you return to the Terminal
 * Run `make` to start building your image. This requires an active internet connection to download all the packages. This will take a couple of hours depending on your system.
 * Once finished, navigate your file browser to the **output/images** dir where you will find a **sdcard.img** file. This is your SD card image.
-* Alternatively you can download a prebuilt Image here: (https://drive.google.com/file/d/1jDVkfmO4_kC0xCqfQeMeR_219UbtfRNR/view?usp=sharing)
+* **Alternatively you can download a prebuilt Image here: (https://drive.google.com/file/d/1jDVkfmO4_kC0xCqfQeMeR_219UbtfRNR/view?usp=sharing)**
 * Write that image file to your SD card either using dd on Linux systems or using https://etcher.download
 * Unmount the SD Card and plug it into your Pi
 * Connect the I2C LCD to the Pi according to the instructions below. Most LCD's will run off of 3.3V with usable but not good contrast, so a level shifter is recommended.
