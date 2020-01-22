@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 __author__ = "Elias Ibis"
-__copyright__ = "Copyright 2019, AutarcTech GmbH"
+__copyright__ = "Copyright 2020, AutarcTech GmbH"
 __license__ = "GPL"
-__version__ = "2.0.2"
+__version__ = "2.3.2"
 __maintainer__ = "Elias Ibis"
 __email__ = "elias.ibis@autarctech.de"
 __status__ = "Development"
@@ -14,14 +14,39 @@ import subprocess
 import json
 import sys
 from threading import Thread
-import netifaces as ni
-import queue
+#import netifaces as ni
+#import queue
+import collections
 from bottle import run, post, request, response, get, route, static_file, HTTPResponse, error
 from time import sleep
 import random
 import socket
 import crcmod
 import os
+
+
+#Simple mapping function. Maps one numeric range into another
+def map(x, in_min, in_max, out_min, out_max):
+    return int((x-in_min) * (out_max-out_min) / (in_max-in_min) + out_min)
+
+try:
+	with open('/boot/currentscale.txt') as f:
+		current_scaling_factor = float(f.readline())	#Try reading the first line of this file in order to set the current scaling factor
+except:
+	current_scaling_factor = 1
+	pass
+
+
+##Custom characters for the 20x4 LCD
+customchars = [
+	[0x0E,0x1F,0x11,0x11,0x11,0x13,0x17,0x1F],	#Battery empty
+	[0x0E,0x1F,0x11,0x11,0x13,0x17,0x1F,0x1F],	#Battery low
+	[0x0E,0x1F,0x11,0x13,0x17,0x1F,0x1F,0x1F],	#Battery medium
+	[0x0E,0x1F,0x13,0x17,0x1F,0x1F,0x1F,0x1F],	#Battery high
+	[0x0E,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F],	#Battery full
+	[0x04,0x0E,0x1F,0x04,0x04,0x04,0x04,0x04],	#Arrow up
+	[0x04,0x04,0x04,0x04,0x04,0x1F,0x0E,0x04]	#Arrow down
+]
 
 
 #######UDP Multicast Code
@@ -68,7 +93,7 @@ except:
 
 #initialize queue for multithreading
 q = []
-q.append(queue.Queue(maxsize=4))
+#q.append(collections.deque(maxlen=2)
 
 #Initializing I2C LCD on address defined by I2C_LCD_Driver module
 try:
@@ -76,22 +101,24 @@ try:
 except:
 	pass
 try:
+	mylcd.lcd_load_custom_chars(customchars)
 	mylcd.lcd_display_string("Battery Status:",1)
 except:
 	pass
 
 
-#Thread that scavenges the serial port for new data and tries to put it into the queue
+#Thread that listens to the network for new data and tries to put it into the queue
 def scavenge_data_q(q):
 	while True:
 		try:
-			data, addr = sock.recvfrom(1024)
-			data = str(data).split(",")
-			if data[2] == '100':
-				if data[1] not in BMS_LIST:
+			data, addr = sock.recvfrom(1024)	#Receive a maximum of 1024 bytes
+			data = str(data).split(",")		#Split the data at the commas
+			if data[2] == '100':		#Only accept valid BMS data of the right type (100)
+				if data[1] not in BMS_LIST:		#Check if the BMS is already listed in the BMS list. If no, then add it's ID number to the list and create a deque for it.
 					BMS_LIST.append(data[1])
+					q.append(collections.deque(maxlen=2))
 				try:
-					q[0].put(data, False)
+					q[BMS_LIST.index(data[1])].append(data)	#Try appending the data to the deque
 				except:
 					sleep(0.1)
 					pass
@@ -102,56 +129,60 @@ def scavenge_data_q(q):
 		sleep(0.1)
 
 
-#Thread that updates the I2C LCD Screen every 0.5 seconds. Blocking queue get
+#Thread that updates the I2C LCD Screen every second. Deque peek
 def update_lcd():
 	try:
 		while True:
-			data = q[0].get()
-			Voltage = float(data[-8])
-			SOC = float(data[-6])
-			Current = float(data[-9])
-			Power = Voltage * Current
-			mylcd.lcd_display_string((str(round(SOC, 1))+"%").rjust(5),2)
-			mylcd.lcd_display_string((str(round(Voltage,2))+"V").rjust(6), 2, 14)
-			mylcd.lcd_display_string((str(round(Current,1))+"A").ljust(7),3)
-			mylcd.lcd_display_string((str(round(Power,2))+"W").rjust(9),3 ,11)
-			mylcd.lcd_display_string(ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr'].rjust(18),4, 2)
-			mylcd.lcd_display_string("",4)
-			mylcd.lcd_write_char(219)
-			if Current > 2000:
-				mylcd.lcd_write_char(127)
-			elif Current < -2000:
-				mylcd.lcd_write_char(126)
-			else:
-				mylcd.lcd_write_char(165)
-			
-			sleep(0.5)
+			for i in range(len(BMS_LIST)):
+				for n in range(10):
+					data = q[i][0]
+					Voltage = float(data[-8])
+					SOC = float(data[-6])
+					Current = float(data[-9]) * current_scaling_factor
+					Power = Voltage * Current
+					mylcd.lcd_display_string((str(round(SOC, 1))+"%").rjust(5),2)
+					mylcd.lcd_display_string((str(round(Voltage,2))+"V").rjust(6), 2, 14)
+					mylcd.lcd_display_string((str(round(Current,1))+"A").ljust(7),3)
+					mylcd.lcd_display_string((str(round(Power,2))+"W").rjust(9),3 ,11)
+					#mylcd.lcd_display_string(ni.ifaddresses('wlan0')[ni.AF_INET][0]['addr'].rjust(18),4, 2)
+					mylcd.lcd_display_string(("ID: " + str(BMS_LIST[i])).rjust(18),4, 2)
+					mylcd.lcd_display_string("",4)
+					mylcd.lcd_write_char(map(int(SOC),20,80,0,4))
+					if Current > 2:
+						mylcd.lcd_write_char(5)
+					elif Current < -2:
+						mylcd.lcd_write_char(6)
+					else:
+						mylcd.lcd_write_char(165)
+					
+					sleep(1)
 	except KeyboardInterrupt:
 		sys.exit()
 	except:
 		pass
 
 
-#This function fetches all the data from the BMS and parses it into a JSON for usage with javascript. Nonblocking queue peek
+#This function parses the raw BMS data into a JSON for usage with javascript. Deque peek
 def get_json():
 	datadict = {'BMSCount':len(BMS_LIST)}
-	try:
-		data = q[0].get()
+	for i in range(len(BMS_LIST)):
+		data = q[i][0]
 		Voltage = float(data[-8])
 		SOC = float(data[-6])
-		Current = float(data[-9])
+		Current = float(data[-9]) * current_scaling_factor
 		Power = Voltage * Current
-		datadict.update({"BMS" + str(len(BMS_LIST)-1):{
+		datadict.update({"BMS" + str(i):{
 		"SOC":{"Unit":"%","Value":SOC},
 		"Voltage":{"Unit":"V","Value":Voltage},
 		"Current":{"Unit":"A","Value":Current},
 		"Power":{"Unit":"W","Value":Power}
-		,"SW":{"QueueSize":q[0].qsize(), "RawData":data}}})
+		,"SW":{"RawData":data}}})
 		json_out = json.dumps(datadict);
-		return json_out;
-	except:
-		pass
+	return json_out;
+	#except:
+		#pass
 
+#Define and start the threads for multithreading.
 t1 = Thread(target=scavenge_data_q, args=(q,))
 t2 = Thread(target=update_lcd)
 t1.start()
@@ -174,6 +205,16 @@ def server_static(filename):
 	response.set_header('Content-Language', 'de')
 	response.add_header("Cache-Control", "no-cache")
 	return response;						#Send requested file from Server root directory
+@route('/de/<filename>')
+def server_static(filename):
+	print(filename)
+	if filename == "restart.html":
+		print("Restart Trig'd")
+		subprocess.Popen('sleep 1; systemctl restart server.service', shell=True)
+	response = static_file(filename, root="Server/de/")
+	response.set_header('Content-Language', 'de')
+	response.add_header("Cache-Control", "no-cache")
+	return response;						#Send requested file from Server root directory. de directory
 @route('/')
 def index():
 	response = static_file("index.html", root="Server")
@@ -181,10 +222,10 @@ def index():
 	response.add_header("Cache-Control", "no-cache")
 	return response;						#Send the index.html as default for accessing the server
 
-@error(404) 
-def error404(error):
-	response = static_file("404.html", root="Server")
-	return response;
+#@error(404) 
+#def error404(error):
+#	response = static_file("404.html", root="Server")
+#	return response;
 
 
-run(host='0.0.0.0', port=80, debug=True)										#Start the Server and listen on all interfaces and port 8080
+run(host='0.0.0.0', port=80, debug=True)										#Start the Server and listen on all interfaces and port 80
