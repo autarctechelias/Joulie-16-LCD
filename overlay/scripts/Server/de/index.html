@@ -1,0 +1,281 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>BMS Monitor Test</title>
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+<meta name="msapplication-TileColor" content="#00aba9">
+<meta name="theme-color" content="#ffffff">
+    <script src="gauge.min.js"></script>
+
+<style>
+
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  background-color: #222;
+  border-radius: 6px;
+  box-shadow: 6px 6px 3px #00000094;
+}
+
+li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 14px 16px;
+  text-decoration: none;
+}
+
+li a:hover {
+  background-color: #83c985;
+}
+
+.active {
+  background-color: #4CAF50;
+}
+
+body {
+  background-color: #355555;
+  cursor: auto;
+  font-family: Arial, Helvetica, sans-serif;
+}
+.flex-container {
+  display: flex;
+  justify-content: center;
+}
+
+.nocursor {
+  cursor: normal;
+}
+
+
+
+</style>
+</head>
+<body>
+
+<ul>
+  <li><a class="active" href="/de/index.html">Hauptansicht</a></li>
+  <li><a href="/de/data.html">Zellspannungen</a></li>
+  <li style="float:right"><a href="/index.html">English</a></li>
+  <li style="float:right"><a href="/restart.html">Neustart</a></li>
+</ul>
+
+
+<p id="demo"></p>
+
+
+<!-- Injecting radial gauge -->
+<div class="flex-container">
+<canvas class="nocursor" id="Gauge_SOC" data-type="radial-gauge"
+        data-width="300"
+        data-height="300"
+        data-units="%"
+        data-title="SOC in %"
+        data-value="0"
+        data-min-value="0"
+        data-max-value="100"
+        data-major-ticks="0,10,20,30,40,50,60,70,80,90,100"
+        data-minor-ticks="2"
+        data-stroke-ticks="false"
+        data-highlights='[
+            { "from": 0, "to": 15, "color": "rgba(255,0,0,.40)" },
+            { "from": 15, "to": 25, "color": "rgba(255,255,0,.40)" },
+            { "from": 25, "to": 80, "color": "rgba(0,255,0,.40)" },
+            { "from": 80, "to": 100, "color": "rgba(0,0,225,.40)" }
+        ]'
+        data-color-plate="#222"
+        data-color-major-ticks="#f5f5f5"
+        data-color-minor-ticks="#ddd"
+        data-color-title="#eee"
+        data-color-border-outer="#333"
+        data-color-border-outer-end="#111"
+        data-color-border-middle="#222"
+        data-color-border-middle-end="#111"
+        data-color-border-inner="#111"
+        data-color-border-inner-end="#333"
+        data-color-units="#ccc"
+        data-color-numbers="#eee"
+        data-color-needle-start="rgba(240, 128, 128, 1)"
+        data-color-needle-end="rgba(255, 160, 122, .9)"
+        data-value-box="true"
+        data-animation-rule="linear"
+        data-animation-duration="150"
+        data-font-value="Led"
+        data-animated-value="true"
+></canvas>
+<canvas class="nocursor" id="Gauge_Power" data-type="radial-gauge"
+        data-width="300"
+        data-height="300"
+        data-units="W"
+        data-title="Leistung"
+        data-value="0"
+        data-min-value="-12000"
+        data-max-value="12000"
+        data-major-ticks="-12000,-9000,-6000,-3000,0,3000,6000,9000,12000"
+        data-minor-ticks="2"
+        data-stroke-ticks="false"
+        data-highlights='[
+            { "from": -12000, "to": -9000, "color": "rgba(255,0,0,.40)" },
+            { "from": -9000, "to": -7000, "color": "rgba(255,255,0,.40)" },
+            { "from": -7000, "to": 7000, "color": "rgba(0,255,0,.40)" },
+            { "from": 7000, "to": 9000, "color": "rgba(255,255,0,.40)" },
+            { "from": 9000, "to": 12000, "color": "rgba(255,0,0,.40)" }
+        ]'
+        data-color-plate="#222"
+        data-color-major-ticks="#f5f5f5"
+        data-color-minor-ticks="#ddd"
+        data-color-title="#eee"
+        data-color-border-outer="#333"
+        data-color-border-outer-end="#111"
+        data-color-border-middle="#222"
+        data-color-border-middle-end="#111"
+        data-color-border-inner="#111"
+        data-color-border-inner-end="#333"
+        data-color-units="#ccc"
+        data-color-numbers="#eee"
+        data-color-needle-start="rgba(240, 128, 128, 1)"
+        data-color-needle-end="rgba(255, 160, 122, .9)"
+        data-value-box="true"
+        data-animation-rule="linear"
+        data-animation-duration="150"
+        data-font-value="Led"
+        data-animated-value="true"
+></canvas>
+</div>
+<br>
+<div class="flex-container">
+<canvas class="nocursor" id="Gauge_MainVoltage" data-type="radial-gauge"
+        data-width="300"
+        data-height="300"
+        data-units="V"
+        data-title="Spannung"
+        data-value="0"
+        data-min-value="48"
+        data-max-value="58"
+        data-major-ticks="48,50,52,54,56,58"
+        data-minor-ticks="4"
+        data-stroke-ticks="false"
+        data-highlights='[
+            { "from": 48, "to": 50, "color": "rgba(255,0,0,.40)" },
+            { "from": 50, "to": 56, "color": "rgba(0,255,0,.40)" },
+            { "from": 56, "to": 58, "color": "rgba(255,0,0,.40)" }
+        ]'
+        data-color-plate="#222"
+        data-color-major-ticks="#f5f5f5"
+        data-color-minor-ticks="#ddd"
+        data-color-title="#eee"
+        data-color-border-outer="#333"
+        data-color-border-outer-end="#111"
+        data-color-border-middle="#222"
+        data-color-border-middle-end="#111"
+        data-color-border-inner="#111"
+        data-color-border-inner-end="#333"
+        data-color-units="#ccc"
+        data-color-numbers="#eee"
+        data-color-needle-start="rgba(240, 128, 128, 1)"
+        data-color-needle-end="rgba(255, 160, 122, .9)"
+        data-value-box="true"
+        data-animation-rule="linear"
+        data-animation-duration="150"
+        data-font-value="Led"
+        data-animated-value="true"
+></canvas>
+<canvas class="nocursor" id="Gauge_Current" data-type="radial-gauge"
+        data-width="300"
+        data-height="300"
+        data-units="A"
+        data-title="Strom"
+        data-value="0"
+        data-min-value="-250"
+        data-max-value="250"
+        data-major-ticks="-250,-200,-150,-100,-50,0,50,100,150,200,250"
+        data-minor-ticks="2"
+        data-stroke-ticks="false"
+        data-highlights='[
+            { "from": -250, "to": -180, "color": "rgba(255,0,0,.40)" },
+            { "from": -180, "to": -150, "color": "rgba(255,255,0,.40)" },
+            { "from": -150, "to": 150, "color": "rgba(0,255,0,.40)" },
+            { "from": 150, "to": 180, "color": "rgba(255,255,0,.40)" },
+			{ "from": 180, "to": 250, "color": "rgba(255,0,0,.40)" }
+        ]'
+        data-color-plate="#222"
+        data-color-major-ticks="#f5f5f5"
+        data-color-minor-ticks="#ddd"
+        data-color-title="#eee"
+        data-color-border-outer="#333"
+        data-color-border-outer-end="#111"
+        data-color-border-middle="#222"
+        data-color-border-middle-end="#111"
+        data-color-border-inner="#111"
+        data-color-border-inner-end="#333"
+        data-color-units="#ccc"
+        data-color-numbers="#eee"
+        data-color-needle-start="rgba(240, 128, 128, 1)"
+        data-color-needle-end="rgba(255, 160, 122, .9)"
+        data-value-box="true"
+        data-animation-rule="linear"
+        data-animation-duration="150"
+        data-font-value="Led"
+        data-animated-value="true"
+></canvas>
+</div>
+<br>
+<script>
+
+
+function updateGauge() {
+	var gaugeSOC = document.getElementById('Gauge_SOC');
+    var gaugePower = document.getElementById('Gauge_Power');
+	var gaugeVolt = document.getElementById('Gauge_MainVoltage');
+	var gaugeCurr = document.getElementById('Gauge_Current');
+	var SOC = 10;
+
+
+	var xmlhttp = new XMLHttpRequest();
+	xmlhttp.onreadystatechange = function() {
+		if (this.readyState == 4 && this.status == 200) {
+		var myObj = JSON.parse(this.responseText);
+		gaugeSOC.setAttribute('data-value', myObj.BMS0.SOC.Value)
+        gaugePower.setAttribute('data-value', myObj.BMS0.Power.Value)
+		gaugeVolt.setAttribute('data-value', myObj.BMS0.Voltage.Value)
+		gaugeCurr.setAttribute('data-value', myObj.BMS0.Current.Value)
+
+
+		if (myObj.BMS0.SOC.Value <= 15) {
+			gaugeSOC.setAttribute('data-highlights', '[{ "from": 0, "to": 15, "color": "rgba(255,0,0,0.8)" }, { "from": 15, "to": 25, "color": "rgba(255,255,0,.40)" }, { "from": 25, "to": 80, "color": "rgba(0,255,0,.40)" }, { "from": 80, "to": 100, "color": "rgba(0,0,225,.40)" }]')
+		}
+		else if (myObj.BMS0.SOC.Value > 15 && myObj.BMS0.SOC.Value < 25) {
+			gaugeSOC.setAttribute('data-highlights', '[{ "from": 0, "to": 15, "color": "rgba(255,0,0,0.40)" }, { "from": 15, "to": 25, "color": "rgba(255,255,0,0.8)" }, { "from": 25, "to": 80, "color": "rgba(0,255,0,.40)" }, { "from": 80, "to": 100, "color": "rgba(0,0,225,.40)" }]')
+		}
+
+		else {
+			gaugeSOC.setAttribute('data-highlights', '[{ "from": 0, "to": 15, "color": "rgba(255,0,0,0.40)" }, { "from": 15, "to": 25, "color": "rgba(255,255,0,.40)" }, { "from": 25, "to": 80, "color": "rgba(0,255,0,.40)" }, { "from": 80, "to": 100, "color": "rgba(0,0,225,.40)" }]')
+		}
+  	}
+	};
+xmlhttp.open("GET", "/data.json", true);
+xmlhttp.send();
+}
+
+var timers = [];
+	 timers.push(setInterval(function() {
+            updateGauge();
+        }, 1250));
+
+
+
+</script>
+</body>
+</html>
