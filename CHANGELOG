@@ -1,0 +1,9 @@
+———————2.3.2———————
+  · Configured systemd-network to be both DHCP Client and Server for use in existing networks and independent setups
+  · ditched queue in favor of deque
+    → allows for old entrys to fall off the queue instead of blocking when queue is full
+    → Now all threads just peek at the latest value in the queue and no thread actually pop's from the queue
+  · Added custom battery characters for the display
+  · Added scaling factor for the current measurement. To use simply place a "currentscale.txt" into the SD-card's boot partition and put a scaling factor in the first line.
+  · Started implementing multi-bms compatibility
+  · Improved web-ui and added german language
