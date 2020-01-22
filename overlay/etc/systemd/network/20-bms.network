@@ -1,1 +1,10 @@
-
+[Match]
+Name=eth0
+[Network]
+DHCP=yes
+Address=10.214.161.1/24
+Gateway=10.214.161.1
+DHCPServer=yes
+[DHCPServer]
+DNS=yes
+DefaultLeaseTimeSec=7200
