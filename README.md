@@ -30,7 +30,7 @@ reworked to utilise the UDP Multicast protocoll enabled via DIP Switch 8 since v
 * Quit the menuconfig by hitting *ESC* until you return to the Terminal
 * Run `make` to start building your image. This requires an active internet connection to download all the packages. This will take a couple of hours depending on your system.
 * Once finished, navigate your file browser to the **output/images** dir where you will find a **sdcard.img** file. This is your SD card image.
-* **Alternatively you can download a prebuilt Image here: (https://drive.google.com/open?id=1bVy2NC1GEXSF4w1Ivt7RKugK-Z9H2YX_)**
+* **Alternatively you can download a prebuilt Image here: (https://drive.google.com/drive/folders/1bVy2NC1GEXSF4w1Ivt7RKugK-Z9H2YX_?usp=sharing)**
 * Write that image file to your SD card either using dd on Linux systems or using https://etcher.download
 * Unmount the SD Card and plug it into your Pi
 * Connect the I2C LCD to the Pi according to the instructions below. Most LCD's will run off of 3.3V with usable but not good contrast, so a level shifter is recommended.
