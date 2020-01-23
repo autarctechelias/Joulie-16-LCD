@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 __author__ = "Elias Ibis"
-__copyright__ = "Copyright 2020, AutarcTech GmbH"
+__copyright__ = "Copyright 2019, AutarcTech GmbH"
 __license__ = "GPL"
-__version__ = "2.3.2"
+__version__ = "2.3.3"
 __maintainer__ = "Elias Ibis"
 __email__ = "elias.ibis@autarctech.de"
 __status__ = "Development"
@@ -14,8 +14,6 @@ import subprocess
 import json
 import sys
 from threading import Thread
-#import netifaces as ni
-#import queue
 import collections
 from bottle import run, post, request, response, get, route, static_file, HTTPResponse, error
 from time import sleep
@@ -24,28 +22,25 @@ import socket
 import crcmod
 import os
 
-
-#Simple mapping function. Maps one numeric range into another
 def map(x, in_min, in_max, out_min, out_max):
-    return int((x-in_min) * (out_max-out_min) / (in_max-in_min) + out_min)
+    return max(min(out_max, int((x-in_min) * (out_max-out_min) / (in_max-in_min) + out_min)), out_min)
+
+
 
 try:
 	with open('/boot/currentscale.txt') as f:
-		current_scaling_factor = float(f.readline())	#Try reading the first line of this file in order to set the current scaling factor
+		current_scaling_factor = float(f.readline())
 except:
 	current_scaling_factor = 1
 	pass
-
-
-##Custom characters for the 20x4 LCD
 customchars = [
-	[0x0E,0x1F,0x11,0x11,0x11,0x13,0x17,0x1F],	#Battery empty
-	[0x0E,0x1F,0x11,0x11,0x13,0x17,0x1F,0x1F],	#Battery low
-	[0x0E,0x1F,0x11,0x13,0x17,0x1F,0x1F,0x1F],	#Battery medium
-	[0x0E,0x1F,0x13,0x17,0x1F,0x1F,0x1F,0x1F],	#Battery high
-	[0x0E,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F],	#Battery full
-	[0x04,0x0E,0x1F,0x04,0x04,0x04,0x04,0x04],	#Arrow up
-	[0x04,0x04,0x04,0x04,0x04,0x1F,0x0E,0x04]	#Arrow down
+	[0x0E,0x1F,0x11,0x11,0x11,0x13,0x17,0x1F],
+	[0x0E,0x1F,0x11,0x11,0x13,0x17,0x1F,0x1F],
+	[0x0E,0x1F,0x11,0x13,0x17,0x1F,0x1F,0x1F],
+	[0x0E,0x1F,0x13,0x17,0x1F,0x1F,0x1F,0x1F],
+	[0x0E,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F,0x1F],
+	[0x04,0x0E,0x1F,0x04,0x04,0x04,0x04,0x04],
+	[0x04,0x04,0x04,0x04,0x04,0x1F,0x0E,0x04]
 ]
 
 
@@ -102,7 +97,7 @@ except:
 	pass
 try:
 	mylcd.lcd_load_custom_chars(customchars)
-	mylcd.lcd_display_string("Battery Status:",1)
+	mylcd.lcd_display_string(__version__,1)
 except:
 	pass
 
@@ -111,14 +106,14 @@ except:
 def scavenge_data_q(q):
 	while True:
 		try:
-			data, addr = sock.recvfrom(1024)	#Receive a maximum of 1024 bytes
-			data = str(data).split(",")		#Split the data at the commas
-			if data[2] == '100':		#Only accept valid BMS data of the right type (100)
-				if data[1] not in BMS_LIST:		#Check if the BMS is already listed in the BMS list. If no, then add it's ID number to the list and create a deque for it.
+			data, addr = sock.recvfrom(1024)
+			data = str(data).split(",")
+			if data[2] == '100':
+				if data[1] not in BMS_LIST:
 					BMS_LIST.append(data[1])
 					q.append(collections.deque(maxlen=2))
 				try:
-					q[BMS_LIST.index(data[1])].append(data)	#Try appending the data to the deque
+					q[BMS_LIST.index(data[1])].append(data)
 				except:
 					sleep(0.1)
 					pass
@@ -132,6 +127,8 @@ def scavenge_data_q(q):
 #Thread that updates the I2C LCD Screen every second. Deque peek
 def update_lcd():
 	try:
+		sleep(1)
+		mylcd.lcd_display_string("Battery Status:",1)
 		while True:
 			for i in range(len(BMS_LIST)):
 				for n in range(10):
@@ -162,7 +159,7 @@ def update_lcd():
 		pass
 
 
-#This function parses the raw BMS data into a JSON for usage with javascript. Deque peek
+#This function is parsing the raw BMS data into a JSON for usage with javascript. Deque peek
 def get_json():
 	datadict = {'BMSCount':len(BMS_LIST)}
 	for i in range(len(BMS_LIST)):
@@ -182,7 +179,6 @@ def get_json():
 	#except:
 		#pass
 
-#Define and start the threads for multithreading.
 t1 = Thread(target=scavenge_data_q, args=(q,))
 t2 = Thread(target=update_lcd)
 t1.start()
@@ -214,7 +210,7 @@ def server_static(filename):
 	response = static_file(filename, root="Server/de/")
 	response.set_header('Content-Language', 'de')
 	response.add_header("Cache-Control", "no-cache")
-	return response;						#Send requested file from Server root directory. de directory
+	return response;						#Send requested file from Server root directory
 @route('/')
 def index():
 	response = static_file("index.html", root="Server")
