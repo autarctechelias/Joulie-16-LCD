@@ -6,11 +6,13 @@ reworked to utilise the UDP Multicast protocoll enabled via DIP Switch 8 since v
 
 × Raspberry Pi
 
+× Class 10 Micro SD Card with at least 4GB
+
+## Optional HW:
+
 × 20x4 I2C LCD
 
 × 3.3V to 5V Level shifter
-
-× Class 10 Micro SD Card with at least 4GB
 
 ×Jumper wires and/or a small circuit board
 
