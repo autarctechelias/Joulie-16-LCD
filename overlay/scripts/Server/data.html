@@ -78,6 +78,65 @@ body {
   border: none;
 }
 
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 34px;
+}
+
+.switch input { 
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 26px;
+  width: 26px;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+input:checked + .slider {
+  background-color: #ff4e00;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(26px);
+  -ms-transform: translateX(26px);
+  transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+  border-radius: 34px;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
 </style>
 
 </head>
@@ -86,13 +145,19 @@ body {
 <ul>
   <li><a href="/">Main</a></li>
   <li><a class="active" href="/data.html">Cell voltages</a></li>
+  <li><a href="/log">Datalog</a></li>
   <li style="float:right"><a href="de/data.html">Deutsch</a></li>
   <li style="float:right"><a href="/restart.html">Restart</a></li>
 </ul>
 <div style="width: 100%; height: 500px">
 <canvas class="chart" id="myChart" width="1000" height="500"></canvas>
 </div>
-<div id="Data"></div>
+<a><font color="white">Show data whilst balancing:</font></a>
+<label class="switch">
+  <input id="show_all" type="checkbox">
+  <span class="slider round"></span>
+</label>
+<!--<div id="Data"></div>-->
 
 <script>
 
@@ -159,9 +224,15 @@ var xmlhttp = new XMLHttpRequest();
 	xmlhttp.onreadystatechange = function() {
 		if (this.readyState == 4 && this.status == 200) {
 		var myObj = JSON.parse(this.responseText);
-		Data.innerHTML = myObj.BMS0.SW.RawData
-		myChart.data.datasets[0].data = myObj.BMS0.SW.RawData.slice(3,19);
-		myChart.update();
+		//Data.innerHTML = myObj.BMS0.SW.RawData
+		if (myObj.BMS0.SW.RawData[40] == "FALSE" && document.getElementById('show_all').checked == false) {
+			myChart.data.datasets[0].data = myObj.BMS0.SW.RawData.slice(3,19);
+			myChart.update();
+		}
+		else if (document.getElementById('show_all').checked == true) {
+			myChart.data.datasets[0].data = myObj.BMS0.SW.RawData.slice(3,19);
+			myChart.update();
+		}
   	}
 	};
 xmlhttp.open("GET", "/data.json", true);
