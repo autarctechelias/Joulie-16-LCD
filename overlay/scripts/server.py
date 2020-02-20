@@ -3,7 +3,7 @@
 __author__ = "Elias Ibis"
 __copyright__ = "Copyright 2019, AutarcTech GmbH"
 __license__ = "GPL"
-__version__ = "2.3.3"
+__version__ = "2.3.5"
 __maintainer__ = "Elias Ibis"
 __email__ = "elias.ibis@autarctech.de"
 __status__ = "Development"
@@ -20,6 +20,7 @@ from time import sleep
 import random
 import socket
 import crcmod
+import time
 import os
 
 def map(x, in_min, in_max, out_min, out_max):
@@ -53,6 +54,7 @@ MCAST_ADDR = "239.255.73.100"
 MCAST_PORT = 1500
 MCAST_TTL = 2
 BMS_LIST = []
+
 
 try:
 	# Create a UDP socket
@@ -104,16 +106,27 @@ except:
 
 #Thread that listens to the network for new data and tries to put it into the queue
 def scavenge_data_q(q):
+	LOG_COUNT = 0
+	LOG_INTERVAL = 60
 	while True:
 		try:
 			data, addr = sock.recvfrom(1024)
-			data = str(data).split(",")
-			if data[2] == '100':
-				if data[1] not in BMS_LIST:
-					BMS_LIST.append(data[1])
+			datal = str(data).split(",")
+			if datal[2] == '100':
+				if LOG_COUNT >= LOG_INTERVAL:
+					#now = time.strftime("%d.%m.%Y-%H:%M:%S", time.localtime(time.time()))                       # Get current system time
+					f = open("Logs/BMS"+str(datal[1])+".csv", "a+")                                                    # Open/create Logfile for each BMS
+					#f.write(str(now)+','+str(data)+'\r\n')                                                           # Write complete message to logfile
+					f.write(str(data)+'\r\n')
+					f.close()
+					LOG_COUNT = 0
+				else:
+					LOG_COUNT +=1
+				if datal[1] not in BMS_LIST:
+					BMS_LIST.append(datal[1])
 					q.append(collections.deque(maxlen=2))
 				try:
-					q[BMS_LIST.index(data[1])].append(data)
+					q[BMS_LIST.index(datal[1])].append(datal)
 				except:
 					sleep(0.1)
 					pass
@@ -190,7 +203,13 @@ def process():
 	response.content_type = 'application/json; charset=UTF8'
 	response.add_header("Cache-Control", "no-cache")
 	return get_json()						#Send JSON to connected clients
-
+@route('/log')
+def server_static():
+	print()
+	response = static_file("BMS"+BMS_LIST[0]+".csv", root="Logs")
+	response.set_header('Content-Language', 'de')
+	response.add_header("Cache-Control", "no-cache")
+	return response;						#Send requested file from Server root directory
 @route('/<filename>')
 def server_static(filename):
 	print(filename)
@@ -211,6 +230,7 @@ def server_static(filename):
 	response.set_header('Content-Language', 'de')
 	response.add_header("Cache-Control", "no-cache")
 	return response;						#Send requested file from Server root directory
+
 @route('/')
 def index():
 	response = static_file("index.html", root="Server")
